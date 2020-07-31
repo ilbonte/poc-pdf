@@ -123,6 +123,11 @@ async function savePdfToS3(fileName, pdf) {
 const Responses = {
     HTTP_OK(data = {}) {
         return {
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Origin': '*',
+            },
             statusCode: 200,
             body: JSON.stringify(data, null, 2),
         };
@@ -130,6 +135,11 @@ const Responses = {
 
     HTTP_BAD_REQUEST(data = {}) {
         return {
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Origin': '*',
+            },
             statusCode: 400,
             body: JSON.stringify(data),
         };
@@ -137,6 +147,11 @@ const Responses = {
 
     INTERNAL_SERVER_ERROR(data = {}) {
         return {
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Origin': '*',
+            },
             statusCode: 500,
             body: JSON.stringify(data),
         };
