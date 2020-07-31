@@ -13,12 +13,8 @@ exports.handler = async (event, context) => {
     try {
 
         const html = Buffer.from(payload.html, 'base64').toString()
-        if (!html) return {
-            statusCode: 400,
-            body: JSON.stringify({message: 'HTML Page not defined'})
-        }
+        if (!html) return Responses.HTTP_BAD_REQUEST({message: 'HTML Page not defined', input: event})
         const pdf = await generatePdf(html, payload);
-
 
         console.log("saving!");
 
@@ -32,31 +28,15 @@ exports.handler = async (event, context) => {
             Expires: 60 * 5
         })
 
-        response = {
-            statusCode: 200,
-            body: JSON.stringify(
-                {
-                    message: url,
-                    input: event,
-                },
-                null,
-                2
-            )
-        }
+        response = Responses.HTTP_OK({
+            message: url
+        })
+
 
     } catch (error) {
         console.log(error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify(
-                {
-                    message: error,
-                    input: event,
-                },
-                null,
-                2
-            ),
-        };
+        response = Responses.INTERNAL_SERVER_ERROR({message: error, input: event})
+
     }
 
     console.log("returning");
@@ -139,3 +119,27 @@ async function savePdfToS3(fileName, pdf) {
 
     await s3.putObject(params).promise();
 }
+
+
+const Responses = {
+    HTTP_OK(data = {}) {
+        return {
+            statusCode: 200,
+            body: JSON.stringify(data, null, 2),
+        };
+    },
+
+    HTTP_BAD_REQUEST(data = {}) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify(data),
+        };
+    },
+
+    INTERNAL_SERVER_ERROR(data = {}) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify(data),
+        };
+    }
+};
