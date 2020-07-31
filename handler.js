@@ -21,12 +21,7 @@ exports.handler = async (event, context) => {
         const fileName = 'file-name-' + unique() + '.pdf';
         await savePdfToS3(fileName, pdf);
 
-
-        const url = await getSignedUrl({
-            Bucket: process.env.BUCKET,
-            Key: fileName,
-            Expires: 60 * 5
-        })
+        const url = await getSignedUrl(fileName)
 
         response = Responses.HTTP_OK({
             message: url
@@ -52,9 +47,13 @@ function unique() {
 }
 
 
-async function getSignedUrl(params) {
+async function getSignedUrl(fileName) {
     return new Promise((resolve, reject) => {
-        s3.getSignedUrl('getObject', params, (err, url) => {
+        s3.getSignedUrl('getObject', {
+            Bucket: process.env.BUCKET,
+            Key: fileName,
+            Expires: 60 * 5
+        }, (err, url) => {
             if (err) reject(err)
             resolve(url);
         })
