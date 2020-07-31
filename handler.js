@@ -11,12 +11,10 @@ exports.handler = async (event, context) => {
     let response = {};
 
     try {
-
-        const html = Buffer.from(payload.html, 'base64').toString()
+        const html = getHtmlFromBase64(payload.html)
         if (!html) return Responses.HTTP_BAD_REQUEST({message: 'HTML Page not defined', input: event})
-        const pdf = await generatePdf(html, payload);
 
-        console.log("saving!");
+        const pdf = await generatePdf(html, payload);
 
         const fileName = 'file-name-' + unique() + '.pdf';
         await savePdfToS3(fileName, pdf);
@@ -27,23 +25,18 @@ exports.handler = async (event, context) => {
             message: url
         })
 
-
     } catch (error) {
         console.log(error);
         response = Responses.INTERNAL_SERVER_ERROR({message: error, input: event})
-
     }
 
-    console.log("returning");
+    console.log("done");
 
     return response;
 };
 
-function unique() {
-    return 'xxxxxxxxxxxx'.replace(/[x]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+function getHtmlFromBase64(html) {
+    return Buffer.from(html, 'base64').toString();
 }
 
 
@@ -108,6 +101,7 @@ async function generatePdf(html, payload) {
 }
 
 async function savePdfToS3(fileName, pdf) {
+    console.log("saving!");
     const params = {
         Bucket: process.env.BUCKET,
         Key: fileName,
@@ -117,6 +111,13 @@ async function savePdfToS3(fileName, pdf) {
     };
 
     await s3.putObject(params).promise();
+}
+
+function unique() {
+    return 'xxxxxxxxxxxx'.replace(/[x]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 
