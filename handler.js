@@ -70,7 +70,7 @@ async function generatePdf(html, payload) {
         margin,
         printBackground,
         width,
-        heigth,
+        height,
     } = payload;
     let pdf = null;
     let browser = null;
@@ -93,7 +93,7 @@ async function generatePdf(html, payload) {
             displayHeaderFooter,
             margin,
             width,
-            heigth
+            height
         });
     } catch (e) {
         console.log("Error generating pdf")
